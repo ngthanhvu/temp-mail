@@ -36,10 +36,7 @@ export interface Inbox {
   created_at: string;
 }
 
-const config = useRuntimeConfig();
-const apiBase = config.public.apiBase as string;
-
-async function apiFetch<T>(path: string): Promise<T> {
+async function apiFetch<T>(path: string, apiBase: string): Promise<T> {
   const res = await fetch(`${apiBase}${path}`);
   if (!res.ok) {
     const error = await res.json().catch(() => ({ error: res.statusText }));
@@ -48,7 +45,7 @@ async function apiFetch<T>(path: string): Promise<T> {
   return res.json();
 }
 
-async function apiPost<T>(path: string, body?: Record<string, unknown>): Promise<T> {
+async function apiPost<T>(path: string, apiBase: string, body?: Record<string, unknown>): Promise<T> {
   const res = await fetch(`${apiBase}${path}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -62,6 +59,9 @@ async function apiPost<T>(path: string, body?: Record<string, unknown>): Promise
 }
 
 export function useInbox() {
+  const config = useRuntimeConfig();
+  const apiBase = config.public.apiBase as string;
+
   const currentEmail = ref<string>('');
   const currentAddress = ref<string>('');
   const currentDomain = ref<string>('');
@@ -96,7 +96,7 @@ export function useInbox() {
     loading.value = true;
     error.value = null;
     try {
-      const inbox = await apiPost<Inbox>('/api/inboxes', domain ? { domain } : undefined);
+      const inbox = await apiPost<Inbox>('/api/inboxes', apiBase, domain ? { domain } : undefined);
       saveCurrentEmail(`${inbox.address}@${inbox.domain_name}`);
       emails.value = [];
       selectedEmail.value = null;
@@ -117,7 +117,7 @@ export function useInbox() {
     loading.value = true;
     error.value = null;
     try {
-      emails.value = await apiFetch<EmailSummary[]>(`/api/inboxes/${addr}/emails`);
+      emails.value = await apiFetch<EmailSummary[]>(`/api/inboxes/${addr}/emails`, apiBase);
     } catch (e) {
       error.value = (e as Error).message;
     } finally {
@@ -129,7 +129,7 @@ export function useInbox() {
     loading.value = true;
     error.value = null;
     try {
-      selectedEmail.value = await apiFetch<FullEmail>(`/api/emails/${id}`);
+      selectedEmail.value = await apiFetch<FullEmail>(`/api/emails/${id}`, apiBase);
     } catch (e) {
       error.value = (e as Error).message;
     } finally {
@@ -139,7 +139,7 @@ export function useInbox() {
 
   async function loadDomains() {
     try {
-      domains.value = await apiFetch<Domain[]>('/api/domains');
+      domains.value = await apiFetch<Domain[]>('/api/domains', apiBase);
     } catch {
       domains.value = [];
     }

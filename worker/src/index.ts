@@ -1,10 +1,3 @@
-import PostalMime from 'postal-mime';
-
-interface Env {
-  WEBHOOK_URL: string;
-  WEBHOOK_SECRET: string;
-}
-
 export default {
   async email(
     message: ForwardableEmailMessage,
@@ -12,37 +5,23 @@ export default {
     _ctx: ExecutionContext
   ): Promise<void> {
     try {
-      // Parse raw MIME email
-      const parsed = await PostalMime.parse(message.raw);
+      // Read raw email as ArrayBuffer
+      const rawBytes = new Uint8Array(await message.raw.arrayBuffer());
 
-      // Build payload — only essential fields, no trace headers
-      const attachments = (parsed.attachments || []).map((a) => ({
-        filename: a.filename || 'untitled',
-        contentType: a.mimeType || 'application/octet-stream',
-        size: a.size || 0,
-        base64: a.content
-          ? btoa(String.fromCharCode(...new Uint8Array(a.content)))
-          : null,
-      }));
+      // Convert to base64 for transmission
+      let binary = '';
+      for (let i = 0; i < rawBytes.length; i++) {
+        binary += String.fromCharCode(rawBytes[i]);
+      }
+      const rawBase64 = btoa(binary);
 
+      // Forward raw email + metadata to backend for parsing
       const payload = {
-        messageId: parsed.messageId || null,
-        sender: parsed.from?.address || message.from,
-        senderName: parsed.from?.name || null,
-        recipient: message.to,
-        subject: parsed.subject || '',
-        bodyText: parsed.text || null,
-        bodyHtml: parsed.html || null,
-        attachments,
-        receivedAt: new Date().toISOString(),
-        headers: {
-          'message-id': parsed.messageId || null,
-          'reply-to':
-            parsed.headers?.find((h) => h.key === 'reply-to')?.value || null,
-        },
+        from: message.from,
+        to: message.to,
+        raw: rawBase64,
       };
 
-      // Forward to backend webhook
       const response = await fetch(env.WEBHOOK_URL, {
         method: 'POST',
         headers: {
@@ -63,3 +42,8 @@ export default {
     }
   },
 };
+
+interface Env {
+  WEBHOOK_URL: string;
+  WEBHOOK_SECRET: string;
+}

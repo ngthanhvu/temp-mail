@@ -13,11 +13,13 @@
     "@fastify/rate-limit": "^10.2.1",
     "better-sqlite3": "^11.7.0",
     "fastify": "^5.2.1",
+    "mailparser": "^3.9.12",
     "nanoid": "^5.0.9",
     "node-schedule": "^2.1.1"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.12",
+    "@types/mailparser": "^3.4.6",
     "@types/node": "^22.10.2",
     "@types/node-schedule": "^2.1.7",
     "tsx": "^4.19.2",

@@ -56,7 +56,15 @@ db.exec(`
 `);
 
 // Seed default placeholder domains — user replaces these with real ones
-const defaultDomains = ['tempmail.example.com', 'mail.example.org'];
+const defaultDomains = [
+  'bintech3d.tech',
+  'devgang.online',
+  'luongquocbinh.site',
+  'ngthanhvu.com',
+  'ngthanhvu.io.vn',
+  'tuitenvu.xyz',
+  'vunhomaka.net',
+];
 const insertDomain = db.prepare('INSERT OR IGNORE INTO domains (name) VALUES (?)');
 
 for (const domain of defaultDomains) {
