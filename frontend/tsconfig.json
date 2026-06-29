@@ -1,0 +1,4 @@
+{
+  // Nuxt auto-generates tsconfig, this ensures base settings
+  "extends": "./.nuxt/tsconfig.json"
+}

@@ -1,0 +1,7 @@
+name = "temp-mail-worker"
+main = "src/index.ts"
+compatibility_date = "2025-06-01"
+
+[vars]
+WEBHOOK_URL = "https://your-server.com/api/webhook/email"
+WEBHOOK_SECRET = "6496cc89b5b4ba6f5d5823a9c6eb7c3ea60e00690b07d4ad7761ad3c0a2431c6"
