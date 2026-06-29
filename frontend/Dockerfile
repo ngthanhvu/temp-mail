@@ -5,7 +5,7 @@ COPY package.json package-lock.json ./
 RUN npm ci
 
 COPY . .
-RUN nuxt build
+RUN npm run build
 
 # --- Runtime ---
 FROM node:22-alpine
