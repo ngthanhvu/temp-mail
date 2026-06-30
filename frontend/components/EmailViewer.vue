@@ -1,36 +1,44 @@
 <template>
-  <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+  <div class="bg-white rounded-2xl border border-slate-200 shadow-sm shadow-slate-200/50 overflow-hidden">
     <!-- Header -->
-    <div class="px-4 py-3 bg-gray-50 border-b border-gray-200">
+    <div class="px-5 py-4 bg-gradient-to-r from-slate-50 to-white border-b border-slate-100">
       <button
         @click="$emit('back')"
-        class="text-sm text-gray-600 hover:text-gray-900 transition-colors mb-2"
+        class="inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-indigo-600 transition-colors mb-3 group"
       >
-        <svg class="w-4 h-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <svg class="w-4 h-4 transition-transform group-hover:-translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
           <polyline points="15 18 9 12 15 6" />
         </svg>
         Back to inbox
       </button>
-      <h2 class="text-lg font-semibold text-gray-900 truncate">{{ email.subject || '(No subject)' }}</h2>
+      <h2 class="text-xl font-bold text-slate-900 leading-snug break-words">{{ email.subject || '(No subject)' }}</h2>
     </div>
 
     <!-- Meta -->
-    <div class="px-4 py-3 border-b border-gray-100">
-      <div class="flex items-center justify-between">
-        <div>
-          <p class="text-sm font-medium text-gray-900">{{ email.sender_name || email.sender }}</p>
-          <p class="text-xs text-gray-500">{{ email.sender }}</p>
+    <div class="px-5 py-4 border-b border-slate-100 flex items-start gap-3">
+      <div
+        class="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white"
+        :class="avatarColor"
+      >
+        {{ initials }}
+      </div>
+      <div class="flex-1 min-w-0">
+        <div class="flex items-center justify-between gap-3">
+          <div class="min-w-0">
+            <p class="text-sm font-semibold text-slate-900 truncate">{{ email.sender_name || email.sender }}</p>
+            <p class="text-xs text-slate-500 truncate">{{ email.sender }}</p>
+          </div>
+          <time class="text-xs text-slate-400 whitespace-nowrap font-medium" :datetime="email.received_at">
+            {{ formatDate(email.received_at) }}
+          </time>
         </div>
-        <time class="text-xs text-gray-400" :datetime="email.received_at">
-          {{ formatDate(email.received_at) }}
-        </time>
       </div>
     </div>
 
     <!-- Attachments -->
-    <div v-if="attachments.length" class="px-4 py-3 border-b border-gray-100 bg-amber-50/50">
-      <p class="text-xs font-medium text-gray-600 mb-2">
-        <svg class="w-3.5 h-3.5 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+    <div v-if="attachments.length" class="px-5 py-4 border-b border-slate-100 bg-amber-50/40">
+      <p class="text-xs font-semibold text-slate-700 mb-2.5 flex items-center gap-1.5">
+        <svg class="w-4 h-4 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48" />
         </svg>
         Attachments ({{ attachments.length }})
@@ -41,7 +49,7 @@
           :key="i"
           :href="att.base64 ? `data:${att.contentType};base64,${att.base64}` : '#'"
           :download="att.filename"
-          class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-xs text-gray-700 hover:bg-gray-50 transition-colors"
+          class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-medium text-slate-700 hover:bg-indigo-50 hover:border-indigo-200 hover:text-indigo-700 transition-colors"
         >
           <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
@@ -49,18 +57,15 @@
             <line x1="12" y1="15" x2="12" y2="3" />
           </svg>
           {{ att.filename }}
-          <span class="text-gray-400">({{ formatSize(att.size) }})</span>
+          <span class="text-slate-400 font-normal">({{ formatSize(att.size) }})</span>
         </a>
       </div>
     </div>
 
     <!-- Body -->
-    <div class="px-4 py-4">
+    <div class="px-5 py-5">
       <!-- HTML body -->
-      <div
-        v-if="email.body_html"
-        class="email-body"
-      >
+      <div v-if="email.body_html" class="email-body">
         <iframe
           :srcdoc="sanitizedHtml"
           sandbox="allow-same-origin"
@@ -70,12 +75,12 @@
       </div>
 
       <!-- Text body -->
-      <div v-else-if="email.body_text" class="prose prose-sm max-w-none text-gray-700 whitespace-pre-wrap">
+      <div v-else-if="email.body_text" class="prose prose-sm max-w-none text-slate-700 whitespace-pre-wrap">
         {{ email.body_text }}
       </div>
 
       <!-- No body -->
-      <div v-else class="text-center py-8 text-gray-400 text-sm">
+      <div v-else class="text-center py-10 text-slate-400 text-sm">
         No content to display
       </div>
     </div>
@@ -100,6 +105,15 @@ interface Attachment {
   base64: string | null;
 }
 
+const AVATAR_COLORS = [
+  'bg-gradient-to-br from-indigo-500 to-violet-600',
+  'bg-gradient-to-br from-emerald-500 to-teal-600',
+  'bg-gradient-to-br from-rose-500 to-pink-600',
+  'bg-gradient-to-br from-amber-500 to-orange-600',
+  'bg-gradient-to-br from-sky-500 to-blue-600',
+  'bg-gradient-to-br from-fuchsia-500 to-purple-600',
+];
+
 const attachments = computed<Attachment[]>(() => {
   if (!props.email.attachments) return [];
   try {
@@ -109,7 +123,20 @@ const attachments = computed<Attachment[]>(() => {
   }
 });
 
-// Sanitize HTML: strip script tags as defense-in-depth
+const initials = computed(() => {
+  const src = props.email.sender_name || props.email.sender || '?';
+  const cleaned = src.replace(/<[^>]*>/g, '').trim();
+  const match = cleaned.match(/[a-zA-Z0-9]/g);
+  if (!match) return '?';
+  return match.slice(0, 2).join('').toUpperCase();
+});
+
+const avatarColor = computed(() => {
+  const id = props.email.sender || '';
+  const idx = [...id].reduce((acc, c) => acc + c.charCodeAt(0), 0) % AVATAR_COLORS.length;
+  return AVATAR_COLORS[idx];
+});
+
 const sanitizedHtml = computed(() => {
   if (!props.email.body_html) return '';
   return props.email.body_html
@@ -137,7 +164,7 @@ function formatSize(bytes: number): string {
 <style scoped>
 .email-body iframe {
   min-height: 300px;
-  border-radius: 0.5rem;
+  border-radius: 0.75rem;
   background: white;
 }
 </style>

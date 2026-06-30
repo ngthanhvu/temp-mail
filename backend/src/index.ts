@@ -16,7 +16,11 @@ const app = Fastify({
 
 // CORS
 await app.register(cors, {
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  origin: [
+    'http://localhost:3000',
+    'http://temp.ngthanhvu.com',
+    'https://temp.ngthanhvu.com',
+  ],
   methods: ['GET', 'POST'],
   credentials: true,
 });
@@ -45,7 +49,7 @@ startCleanupJob();
 
 // Start server
 try {
-  await app.listen({ port: PORT, host: '0.0.0.0' });
+  await app.listen({ port: PORT, host: '::' });
   console.log(`[server] Running on http://0.0.0.0:${PORT}`);
 } catch (err) {
   app.log.error(err);

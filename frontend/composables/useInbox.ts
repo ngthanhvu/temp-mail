@@ -49,7 +49,7 @@ async function apiPost<T>(path: string, apiBase: string, body?: Record<string, u
   const res = await fetch(`${apiBase}${path}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: body ? JSON.stringify(body) : undefined,
+    body: JSON.stringify(body ?? {}),
   });
   if (!res.ok) {
     const error = await res.json().catch(() => ({ error: res.statusText }));
